@@ -1,0 +1,18 @@
+# 主项目的 config.yaml
+email_attacher:
+  poll_interval: 300
+  attachment_save_path: "./attachments"
+  processed_emails_path: "./processed_emails.json"
+  providers:
+    - type: "qq"
+      config:
+        imap_addr: "imap.qq.com"
+        port: 993
+        username: "your_qq@qq.com"
+        password: "your_auth_code"
+  logger_config:
+    level: "info"
+    path: "./logs/email_attacher.log"
+  retry_config:
+    max_attempts: 3
+    interval: "5s"

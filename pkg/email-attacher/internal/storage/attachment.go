@@ -3,21 +3,21 @@ package storage
 import (
 	"os"
 
-	"easyHR/PKG/email-attacher/domain"
+	"easyHR/pkg/email-attacher/domain"
 	"easyHR/pkg/logger"
 )
 
 // AttachmentStorage 附件存储（基于本地文件系统）
 type AttachmentStorage struct {
-	basePath string            // 附件存储根目录
-	logger   *logger.ZapLogger // 日志器
+	basePath string          // 附件存储根目录
+	logger   logger.LoggerV1 // 日志器
 }
 
 // NewAttachmentStorage 创建附件存储实例
-func NewAttachmentStorage(basePath string) *AttachmentStorage {
+func NewAttachmentStorage(basePath string, logger logger.LoggerV1) *AttachmentStorage {
 	return &AttachmentStorage{
 		basePath: basePath,
-		logger:   logger.MustNewDefaultLogger(),
+		logger:   logger,
 	}
 }
 
@@ -37,7 +37,13 @@ func (as *AttachmentStorage) SaveAttachment(client domain.EmailClient, att domai
 	if err := client.DownloadAttachment(att, savePath); err != nil {
 		return err
 	}
-
-	as.logger.Info("附件保存成功", logger.Zap.String("name", att.Name), logger.Zap.String("path", savePath))
+	as.logger.Info("附件保存成功",
+		logger.Field{
+			Key: "name",
+			Val: att.Name,
+		}, logger.Field{
+			Key: "path",
+			Val: savePath,
+		})
 	return nil
 }

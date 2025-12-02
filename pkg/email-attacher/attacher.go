@@ -6,8 +6,8 @@ import (
 	"easyHR/pkg/email-attacher/config"
 	"easyHR/pkg/email-attacher/domain"
 	internalConfig "easyHR/pkg/email-attacher/internal/config"
-	"easyHR/pkg/email-attacher/internal/config/validator"
 	"easyHR/pkg/email-attacher/internal/poller"
+	"easyHR/pkg/logger"
 )
 
 // EmailAttacher 邮件附件下载器（对外暴露的核心结构体）
@@ -17,16 +17,16 @@ type EmailAttacher struct {
 	cancel context.CancelFunc
 }
 
-// 附件下载成功回调函数类型
-type AttachmentCallback func(email domain.Email, att domain.Attachment, savePath string)
+// AttachmentCallback 附件下载成功回调函数类型
+type AttachmentCallback = domain.AttachmentCallback
 
-// 错误回调函数类型
-type ErrorCallback func(err error, provider string)
+// ErrorCallback 错误回调函数类型
+type ErrorCallback = domain.ErrorCallback
 
 // NewEmailAttacher 初始化下载器（主项目入口方法）
-func NewEmailAttacher(cfg *config.AppConfig) (*EmailAttacher, error) {
+func NewEmailAttacher(cfg *config.AppConfig, logger logger.LoggerV1) (*EmailAttacher, error) {
 	// 1. 校验外部配置合法性
-	if err := validator.ValidateConfig(cfg); err != nil {
+	if err := internalConfig.ValidateConfig(cfg); err != nil {
 		return nil, err
 	}
 
@@ -37,7 +37,7 @@ func NewEmailAttacher(cfg *config.AppConfig) (*EmailAttacher, error) {
 	}
 
 	// 3. 初始化内部轮询器
-	pollerInstance, err := poller.NewPoller(internalCfg)
+	pollerInstance, err := poller.NewPoller(internalCfg, logger)
 	if err != nil {
 		return nil, err
 	}

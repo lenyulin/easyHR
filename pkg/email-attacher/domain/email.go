@@ -1,6 +1,10 @@
 package domain
 
-import "time"
+import (
+	"time"
+
+	"github.com/emersion/go-imap/v2"
+)
 
 // Attachment 邮件附件模型（主项目可能需要引用）
 type Attachment struct {
@@ -13,7 +17,7 @@ type Attachment struct {
 
 // Email 邮件模型（主项目可能需要引用）
 type Email struct {
-	ID          string       // 邮件唯一标识
+	ID          imap.UID     // 邮件唯一标识
 	From        string       // 发件人（xxx@xxx.com）
 	To          []string     // 收件人列表
 	Subject     string       // 邮件主题
@@ -21,3 +25,9 @@ type Email struct {
 	Attachments []Attachment // 附件列表
 	IsRead      bool         // 是否已读
 }
+
+// AttachmentCallback 附件下载成功回调函数类型
+type AttachmentCallback func(email Email, att Attachment, savePath string)
+
+// ErrorCallback 错误回调函数类型
+type ErrorCallback func(err error, provider string)

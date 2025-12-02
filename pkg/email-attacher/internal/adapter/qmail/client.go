@@ -8,18 +8,28 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/emersion/go-imap/v2"
 	"github.com/emersion/go-imap/v2/imapclient"
 )
 
+var searchCriteria = &imap.SearchCriteria{Or: [][2]imap.SearchCriteria{{
+	{Body: []string{"校园招聘"}},
+	{Body: []string{"Campus Recruitment"}},
+}}}
+
 type QQEmailClient struct {
 	provider   string
 	imapCfg    config.IMAPConfig
-	imapClient *imapclient.Client // 正确类型：*client.Client
+	imapClient *imapclient.Client
+}
+
+// NewQQEmailClient 创建QQ客户端实例（工厂调用）
+func NewQQEmailClient() *QQEmailClient {
+	return &QQEmailClient{
+		provider: "qq",
+	}
 }
 
 // Init 初始化客户端
@@ -56,9 +66,7 @@ func (q *QQEmailClient) ListUnreadEmails() ([]domain.Email, error) {
 	}
 
 	// 搜索未读邮件
-	data, err := q.imapClient.UIDSearch(&imap.SearchCriteria{
-		Body: []imap.SearchKey{imap.SearchKeyUnseen},
-	}, nil).Wait()
+	data, err := q.imapClient.UIDSearch(searchCriteria, nil).Wait()
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +102,7 @@ func (q *QQEmailClient) ListUnreadEmails() ([]domain.Email, error) {
 		}
 
 		email := domain.Email{
-			ID:     fmt.Sprintf("qq-%d", msg.UID),
+			ID:     msg.UID,
 			IsRead: isRead,
 		}
 
@@ -111,9 +119,12 @@ func (q *QQEmailClient) ListUnreadEmails() ([]domain.Email, error) {
 			email.SentAt = msg.Envelope.Date
 		}
 
-		// 解析附件（简化逻辑，实际需解析邮件正文结构）
-		email.Attachments, _ = q.parseAttachments(msg)
+		//TODO:解析附件未实现
+		panic("not implete method")
 
+		// 解析附件（简化逻辑，实际需解析邮件正文结构）
+		// email.Attachments, _ = q.parseAttachments(msg)
+		email.Attachments = []domain.Attachment{}
 		emails = append(emails, email)
 	}
 
@@ -129,23 +140,17 @@ func (q *QQEmailClient) DownloadAttachment(att domain.Attachment, savePath strin
 }
 
 // MarkAsRead 标记邮件为已读
-func (q *QQEmailClient) MarkAsRead(emailID string) error {
+func (q *QQEmailClient) MarkAsRead(emailID imap.UID) error {
 	if q.imapClient == nil {
 		return fmt.Errorf("IMAP客户端未初始化")
 	}
 
-	// 提取邮件UID（从emailID中解析，如"qq-123" → 123）
-	uidStr := strings.TrimPrefix(emailID, "qq-")
-	uid, err := strconv.Atoi(uidStr)
-	if err != nil {
-		return fmt.Errorf("无效邮件ID：%s", emailID)
-	}
-
 	// 标记为已读（添加Seen标记）
-	return q.imapClient.Store(imap.UIDSetNum(uint32(uid)), &imap.StoreFlags{
+	_, err := q.imapClient.Store(imap.UIDSetNum(emailID), &imap.StoreFlags{
 		Op:    imap.StoreFlagsAdd,
 		Flags: []imap.Flag{imap.FlagSeen},
-	}, nil).Wait()
+	}, nil).Collect()
+	return err
 }
 
 // GetProvider 获取服务商名称
@@ -155,16 +160,19 @@ func (q *QQEmailClient) GetProvider() string {
 
 // parseAttachments 解析邮件附件（简化实现）
 func (q *QQEmailClient) parseAttachments(msg *imapclient.FetchMessageData) ([]domain.Attachment, error) {
-	var attachments []domain.Attachment
+
+	panic("not implete method")
+
+	// var attachments []domain.Attachment
 
 	// 实际需解析邮件MIME结构，这里简化模拟
-	if msg.Envelope != nil && strings.Contains(msg.Envelope.Subject, "附件") {
-		attachments = append(attachments, domain.Attachment{
-			ID:   fmt.Sprintf("qq-att-%d", msg.UID),
-			Name: fmt.Sprintf("attachment-%d.pdf", msg.UID),
-			Size: msg.Size,
-		})
-	}
+	// if msg.Envelope != nil && strings.Contains(msg.Envelope.Subject, "附件") {
+	// 	attachments = append(attachments, domain.Attachment{
+	// 		ID:   fmt.Sprintf("qq-att-%d", msg.UID),
+	// 		Name: fmt.Sprintf("attachment-%d.pdf", msg.UID),
+	// 		Size: msg.Size,
+	// 	})
+	// }
 
-	return attachments, nil
+	// return attachments, nil
 }

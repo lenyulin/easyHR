@@ -14,12 +14,12 @@ import (
 // fn: 要重试的函数（返回error则重试，返回nil则成功）
 func Retry(ctx context.Context, maxAttempts int, interval time.Duration, fn func() error) error {
 	// 配置退避策略（指数退避）
-	bo := backoff.NewExponentialBackOff()
-	bo.InitialInterval = interval
-	bo.MaxElapsedTime = 0 // 不限制总时间
+	b := backoff.NewExponentialBackOff()
+	b.InitialInterval = interval
+	b.MaxElapsedTime = 0 // 不限制总时间
 
 	// 限制最大重试次数
-	bo = backoff.WithMaxRetries(bo, uint64(maxAttempts-1))
+	bo := backoff.WithMaxRetries(b, uint64(maxAttempts-1))
 	// 绑定上下文（支持取消）
 	bo = backoff.WithContext(bo, ctx)
 

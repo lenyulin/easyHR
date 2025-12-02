@@ -6,22 +6,24 @@ import (
 	"sync"
 
 	"easyHR/pkg/logger"
+
+	"github.com/emersion/go-imap/v2"
 )
 
 // ProcessedStorage 已处理邮件存储（基于文件）
 type ProcessedStorage struct {
 	filePath     string            // 存储文件路径
-	processedIDs map[string]bool   // 已处理邮件ID缓存
+	processedIDs map[imap.UID]bool // 已处理邮件ID缓存
 	mu           sync.RWMutex      // 读写锁（保证并发安全）
-	logger       *logger.ZapLogger // 日志器
+	logger       logger.LoggerV1
 }
 
 // NewProcessedStorage 创建已处理邮件存储实例
-func NewProcessedStorage(filePath string) (*ProcessedStorage, error) {
+func NewProcessedStorage(filePath string, logger logger.LoggerV1) (*ProcessedStorage, error) {
 	ps := &ProcessedStorage{
 		filePath:     filePath,
-		processedIDs: make(map[string]bool),
-		logger:       logger.MustNewDefaultLogger(),
+		processedIDs: make(map[imap.UID]bool),
+		logger:       logger,
 	}
 
 	// 加载已处理记录
@@ -33,14 +35,14 @@ func NewProcessedStorage(filePath string) (*ProcessedStorage, error) {
 }
 
 // IsProcessed 检查邮件是否已处理
-func (ps *ProcessedStorage) IsProcessed(emailID string) bool {
+func (ps *ProcessedStorage) IsProcessed(emailID imap.UID) bool {
 	ps.mu.RLock()
 	defer ps.mu.RUnlock()
 	return ps.processedIDs[emailID]
 }
 
 // MarkAsProcessed 标记邮件为已处理（并持久化）
-func (ps *ProcessedStorage) MarkAsProcessed(emailID string) error {
+func (ps *ProcessedStorage) MarkAsProcessed(emailID imap.UID) error {
 	ps.mu.Lock()
 	defer ps.mu.Unlock()
 
@@ -65,8 +67,11 @@ func (ps *ProcessedStorage) load() error {
 	if err := json.Unmarshal(data, &ps.processedIDs); err != nil {
 		return err
 	}
-
-	ps.logger.Info("已处理邮件记录加载成功", logger.Zap.Int("count", len(ps.processedIDs)))
+	ps.logger.Info("已处理邮件记录加载成功",
+		logger.Field{
+			Key: "count",
+			Val: len(ps.processedIDs),
+		})
 	return nil
 }
 

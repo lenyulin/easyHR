@@ -8,8 +8,8 @@ email_attacher:
       config:
         imap_addr: "imap.qq.com"
         port: 993
-        username: "your_qq@qq.com"
-        password: "your_auth_code"
+        username: "1733889704@qq.com"
+        password: "rzdcdscowjbmbaeg"
   logger_config:
     level: "info"
     path: "./logs/email_attacher.log"

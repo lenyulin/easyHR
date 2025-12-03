@@ -1,6 +1,6 @@
 # 主项目的 config.yaml
 email_attacher:
-  poll_interval: 300
+  poll_interval: 60
   attachment_save_path: "./attachments"
   processed_emails_path: "./processed_emails.json"
   providers:
@@ -10,9 +10,6 @@ email_attacher:
         port: 993
         username: "1733889704@qq.com"
         password: "rzdcdscowjbmbaeg"
-  logger_config:
-    level: "info"
-    path: "./logs/email_attacher.log"
   retry_config:
     max_attempts: 3
-    interval: "5s"
+    interval: "10s"

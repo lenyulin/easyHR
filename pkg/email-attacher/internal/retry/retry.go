@@ -13,6 +13,7 @@ import (
 // interval: 初始重试间隔
 // fn: 要重试的函数（返回error则重试，返回nil则成功）
 func Retry(ctx context.Context, maxAttempts int, interval time.Duration, fn func() error) error {
+
 	// 配置退避策略（指数退避）
 	b := backoff.NewExponentialBackOff()
 	b.InitialInterval = interval

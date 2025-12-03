@@ -11,10 +11,7 @@ import (
 
 // 支持的服务商类型
 var supportedProviders = map[string]bool{
-	"qq":      true,
-	"netease": true,
-	"gmail":   true,
-	"outlook": true,
+	"qq": true,
 }
 
 // 支持的日志级别
@@ -70,32 +67,6 @@ func ValidateConfig(cfg *config.AppConfig) error {
 			return err
 		}
 	}
-
-	// 5. 日志配置校验
-	if cfg.LoggerConfig != nil {
-		logLevel := strings.ToLower(cfg.LoggerConfig.Level)
-		if !supportedLogLevels[logLevel] {
-			levelsStr := strings.Join(getMapKeys(supportedLogLevels), ", ")
-			return fmt.Errorf("日志级别不支持（支持：%s）", levelsStr)
-		}
-		if cfg.LoggerConfig.Path != "" {
-			logDir := filepath.Dir(cfg.LoggerConfig.Path)
-			if err := checkPathWritable(logDir); err != nil {
-				return fmt.Errorf("日志路径无效：%w", err)
-			}
-		}
-	}
-
-	// 6. 重试配置校验
-	if cfg.RetryConfig != nil {
-		if cfg.RetryConfig.MaxAttempts < 1 {
-			return errors.New("重试次数（MaxAttempts）必须≥1")
-		}
-		if cfg.RetryConfig.Interval < 0 {
-			return errors.New("重试间隔（Interval）不能为负数")
-		}
-	}
-
 	return nil
 }
 

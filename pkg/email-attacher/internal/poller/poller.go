@@ -92,14 +92,23 @@ func (p *Poller) doPoll() {
 
 		// 获取未读邮件（带重试）
 		var unreadEmails []domain.Email
-		err := retry.Retry(context.Background(), p.retryCfg.MaxAttempts, p.retryCfg.Interval, func() error {
-			emails, err := client.ListUnreadEmails()
-			if err != nil {
-				return err
-			}
-			unreadEmails = emails
-			return nil
-		})
+		// err := retry.Retry(context.Background(), p.retryCfg.MaxAttempts, p.retryCfg.Interval, func() error {
+		// 	emails, err := client.ListUnreadEmails()
+		// 	if err != nil {
+		// 		return err
+		// 	}
+		// 	unreadEmails = emails
+		// 	return nil
+		// })
+		emails, err := client.ListUnreadEmails()
+		if err != nil {
+			p.logger.Error("获取未读邮件失败", logger.Field{
+				Key: "err",
+				Val: err.Error(),
+			})
+			continue
+		}
+		unreadEmails = emails
 		if err != nil {
 			p.logger.Info("获取未读邮件失败", logger.Field{
 				Key: "provider",

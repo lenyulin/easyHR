@@ -22,11 +22,9 @@ func InitInternalConfig(externalCfg *config.AppConfig) (*InternalConfig, error) 
 	if err != nil {
 		return nil, fmt.Errorf("存储配置：%w", err)
 	}
-
-	// 3. 构建重试配置
 	retryCfg := buildRetryConfig(externalCfg.RetryConfig)
 
-	// 4. 构建服务商配置
+	// 3. 构建服务商配置
 	providersCfg, err := buildProvidersConfig(externalCfg.Providers)
 	if err != nil {
 		return nil, fmt.Errorf("服务商配置：%w", err)
@@ -36,9 +34,31 @@ func InitInternalConfig(externalCfg *config.AppConfig) (*InternalConfig, error) 
 	return &InternalConfig{
 		PollerConfig:    *pollerCfg,
 		StorageConfig:   *storageCfg,
-		RetryConfig:     retryCfg,
 		ProvidersConfig: providersCfg,
+		RetryConfig:     retryCfg,
 	}, nil
+}
+
+// 构建重试配置（补全默认值）
+func buildRetryConfig(externalRetry *config.RetryConfig) RetryConfig {
+	if externalRetry == nil {
+		return RetryConfig{
+			MaxAttempts: 3,
+			Interval:    5 * time.Second,
+		}
+	}
+
+	cfg := RetryConfig{
+		MaxAttempts: externalRetry.MaxAttempts,
+		Interval:    externalRetry.Interval,
+	}
+	if cfg.MaxAttempts < 1 {
+		cfg.MaxAttempts = 3
+	}
+	if cfg.Interval < 0 {
+		cfg.Interval = 5 * time.Second
+	}
+	return cfg
 }
 
 // 构建轮询器配置
@@ -64,28 +84,6 @@ func buildStorageConfig(externalCfg *config.AppConfig) (*StorageConfig, error) {
 		AttachmentSavePath:  attachPath,
 		ProcessedEmailsPath: processedPath,
 	}, nil
-}
-
-// 构建重试配置（补全默认值）
-func buildRetryConfig(externalRetry *config.RetryConfig) RetryConfig {
-	if externalRetry == nil {
-		return RetryConfig{
-			MaxAttempts: 3,
-			Interval:    5 * time.Second,
-		}
-	}
-
-	cfg := RetryConfig{
-		MaxAttempts: externalRetry.MaxAttempts,
-		Interval:    externalRetry.Interval,
-	}
-	if cfg.MaxAttempts < 1 {
-		cfg.MaxAttempts = 3
-	}
-	if cfg.Interval < 0 {
-		cfg.Interval = 5 * time.Second
-	}
-	return cfg
 }
 
 // 构建服务商配置（map转强类型）

@@ -92,23 +92,15 @@ func (p *Poller) doPoll() {
 
 		// 获取未读邮件（带重试）
 		var unreadEmails []domain.Email
-		// err := retry.Retry(context.Background(), p.retryCfg.MaxAttempts, p.retryCfg.Interval, func() error {
-		// 	emails, err := client.ListUnreadEmails()
-		// 	if err != nil {
-		// 		return err
-		// 	}
-		// 	unreadEmails = emails
-		// 	return nil
-		// })
-		emails, err := client.ListUnreadEmails()
-		if err != nil {
-			p.logger.Error("获取未读邮件失败", logger.Field{
-				Key: "err",
-				Val: err.Error(),
-			})
-			continue
-		}
-		unreadEmails = emails
+		err := retry.Retry(context.Background(), p.retryCfg.MaxAttempts, p.retryCfg.Interval, func() error {
+			emails, err := client.ListUnreadEmails()
+			if err != nil {
+				return err
+			}
+			unreadEmails = emails
+			return nil
+		})
+		//emails, err := client.ListUnreadEmails()
 		if err != nil {
 			p.logger.Info("获取未读邮件失败", logger.Field{
 				Key: "provider",
@@ -119,16 +111,17 @@ func (p *Poller) doPoll() {
 			}
 			continue
 		}
-
-		p.logger.Info("发现未读邮件",
-			logger.Field{
-				Key: "provider",
-				Val: provider},
-			logger.Field{
-				Key: "count",
-				Val: len(unreadEmails),
-			})
-
+		//unreadEmails = emails
+		if len(unreadEmails) == 0 {
+			p.logger.Info("发现未读邮件",
+				logger.Field{
+					Key: "provider",
+					Val: provider},
+				logger.Field{
+					Key: "count",
+					Val: len(unreadEmails),
+				})
+		}
 		// 处理每封邮件
 		for _, email := range unreadEmails {
 			// 过滤已处理邮件

@@ -13,3 +13,8 @@ email_attacher:
   retry_config:
     max_attempts: 3
     interval: "10s"
+
+cv_helper:
+  mongo_uri: "mongodb://localhost:27017"
+  database: "easyhr"
+  collection: "cvs"

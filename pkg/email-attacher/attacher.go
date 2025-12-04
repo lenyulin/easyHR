@@ -53,6 +53,9 @@ func NewEmailAttacher(cfg *config.AppConfig, logger logger.LoggerV1) (*EmailAtta
 
 // Start 启动轮询（非阻塞，在goroutine中运行）
 func (e *EmailAttacher) Start() error {
+	if e.ctx.Err() != nil {
+		e.ctx, e.cancel = context.WithCancel(context.Background())
+	}
 	go e.poller.Run(e.ctx)
 	return nil
 }

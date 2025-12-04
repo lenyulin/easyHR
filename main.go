@@ -2,15 +2,17 @@ package main
 
 import (
 	"context"
-	cvhelper "easyHR/pkg/cv-helper"
-	"easyHR/pkg/cv-helper/store"
+	"easyHR/pkg/cv"
+	"easyHR/pkg/cv/pdf"
 	emailattacher "easyHR/pkg/email-attacher"
 	"easyHR/pkg/email-attacher/config"
 	emailattacherdomain "easyHR/pkg/email-attacher/domain"
 	"easyHR/pkg/logger"
+	"easyHR/pkg/storage"
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strconv"
 	"sync"
 	"syscall"
@@ -23,6 +25,8 @@ import (
 type CVHelperConfig struct {
 	MongoURI   string `yaml:"mongo_uri"`
 	Database   string `yaml:"database"`
+	Username   string `yaml:"username"`
+	Password   string `yaml:"password"`
 	Collection string `yaml:"collection"`
 }
 
@@ -64,13 +68,19 @@ func main() {
 		panic(err)
 	}
 
-	// 初始化 Mongo Store
-	mongoStore, err := store.NewMongoStore(mainCfg.CVHelper.MongoURI, mainCfg.CVHelper.Database, mainCfg.CVHelper.Collection)
+	// 初始化 Storage
+	ctx := context.Background()
+	store, err := storage.InitStorage(&storage.MongoDBConfig{
+		URI:           mainCfg.CVHelper.MongoURI,
+		Username:      mainCfg.CVHelper.Username,
+		Password:      mainCfg.CVHelper.Password,
+		DBName:        mainCfg.CVHelper.Database,
+		EnableMonitor: true,
+	})
 	if err != nil {
 		panic(err)
 	}
-	ctx := context.Background()
-	defer mongoStore.Close(ctx) // 注意：这里简单处理，实际应传入 context
+	defer store.Close(ctx) // 注意：这里简单处理，实际应传入 context
 
 	// 初始化下载器
 	attacher, err := emailattacher.NewEmailAttacher(&mainCfg.EmailAttacher, log)
@@ -84,11 +94,12 @@ func main() {
 		isPaused bool
 	)
 
-	// 初始化 CV Helper
-	cvHelper := cvhelper.NewCVHelper(mongoStore, log)
+	// 初始化 CV Service
+	pdfParser := pdf.NewParser()
+	cvService := cv.NewService(store, mainCfg.CVHelper.Collection, pdfParser, log)
 	cvChan := make(chan string, 100)
 
-	cvHelper.Run(cvChan, func() {
+	cvService.Run(cvChan, func() {
 		// 当 CVHelper 空闲时回调
 		mu.Lock()
 		defer mu.Unlock()
@@ -107,8 +118,9 @@ func main() {
 		log.Info(fmt.Sprintf("附件下载成功: 邮件ID=%s,附件名=%s,路径=%s", strconv.Itoa(int(email.ID)), att.Name, savePath))
 
 		// 检查通道是否已满（简单的背压控制）
+		fullPath := filepath.Join(savePath, att.Name)
 		select {
-		case cvChan <- savePath:
+		case cvChan <- fullPath:
 			// 成功发送
 		default:
 			// 通道已满，暂停轮询
@@ -122,7 +134,7 @@ func main() {
 
 			// 阻塞发送（确保不丢数据，但会阻塞当前 goroutine，即 poller 的 goroutine）
 			// 注意：这里阻塞会导致 poller 暂停处理后续邮件，这正是我们想要的
-			cvChan <- savePath
+			cvChan <- fullPath
 		}
 	})
 

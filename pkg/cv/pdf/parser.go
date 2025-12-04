@@ -1,4 +1,4 @@
-package parser
+package pdf
 
 import (
 	"bytes"
@@ -7,13 +7,13 @@ import (
 	"github.com/ledongthuc/pdf"
 )
 
-type PDFParser struct{}
+type Parser struct{}
 
-func NewPDFParser() *PDFParser {
-	return &PDFParser{}
+func NewParser() *Parser {
+	return &Parser{}
 }
 
-func (p *PDFParser) Parse(filePath string) (string, error) {
+func (p *Parser) Parse(filePath string) (string, error) {
 	f, r, err := pdf.Open(filePath)
 	if err != nil {
 		return "", fmt.Errorf("failed to open pdf: %w", err)

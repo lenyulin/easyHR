@@ -7,6 +7,7 @@ import (
 	emailattacher "easyHR/pkg/email-attacher"
 	"easyHR/pkg/email-attacher/config"
 	emailattacherdomain "easyHR/pkg/email-attacher/domain"
+	emailreply "easyHR/pkg/email-reply"
 	"easyHR/pkg/logger"
 	"easyHR/pkg/storage"
 	"fmt"
@@ -30,9 +31,23 @@ type CVHelperConfig struct {
 	Collection string `yaml:"collection"`
 }
 
+// SMTPConfig 存储SMTP服务器连接参数和认证信息
+type SMTPConfig struct {
+	IMAPServer string `yaml:"imap_server"`
+	IMAPPort   int    `yaml:"imap_port"`
+	SMTPServer string `yaml:"smtp_server"`
+	SMTPPort   int    `yaml:"smtp_port"`
+	Username   string `yaml:"username"`
+	Password   string `yaml:"password"`
+	UseTLS     bool   `yaml:"use_tls"`
+	FromEmail  string `yaml:"from_email"`
+	FromName   string `yaml:"from_name"`
+}
+
 type MainConfig struct {
 	EmailAttacher config.AppConfig `yaml:"email_attacher"`
 	CVHelper      CVHelperConfig   `yaml:"cv_helper"`
+	SMTPConfig    SMTPConfig       `yaml:"smtp_config"`
 }
 
 func InitLogger() logger.LoggerV1 {
@@ -66,6 +81,20 @@ func main() {
 	mainCfg, err := loadConfig()
 	if err != nil {
 		panic(err)
+	}
+
+	// 初始化 email-reply 包
+	smtpCfg := &emailreply.Config{
+		SMTPServer: mainCfg.SMTPConfig.SMTPServer,
+		SMTPPort:   mainCfg.SMTPConfig.SMTPPort,
+		Username:   mainCfg.SMTPConfig.Username,
+		Password:   mainCfg.SMTPConfig.Password,
+		UseTLS:     mainCfg.SMTPConfig.UseTLS,
+		FromEmail:  mainCfg.SMTPConfig.FromEmail,
+		FromName:   mainCfg.SMTPConfig.FromName,
+	}
+	if err = emailreply.Init(smtpCfg); err != nil {
+		panic(fmt.Sprintf("Failed to initialize email-reply package: %v", err))
 	}
 
 	// 初始化 Storage

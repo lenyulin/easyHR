@@ -8,6 +8,8 @@ email_attacher:
       config:
         imap_addr: "imap.qq.com"
         port: 993
+        smtp_addr: "smtp.qq.com"
+        smtp_port: 587
         username: "1733889704@qq.com"
         password: "rzdcdscowjbmbaeg"
   retry_config:
@@ -20,3 +22,15 @@ cv_helper:
   username: "root"
   password: "123456"
   collection: "cvs"
+
+# SMTP配置，用于发送邮件回复
+smtp_config:
+  imap_server: "imap.qq.com"
+  imap_port: 993
+  smtp_server: "smtp.qq.com"
+  smtp_port: 587
+  username: "1733889704@qq.com"
+  password: "rzdcdscowjbmbaeg"
+  use_tls: true
+  from_email: "1733889704@qq.com"
+  from_name: "easyHR招聘组"

@@ -33,8 +33,6 @@ type CVHelperConfig struct {
 
 // SMTPConfig 存储SMTP服务器连接参数和认证信息
 type SMTPConfig struct {
-	IMAPServer string `yaml:"imap_server"`
-	IMAPPort   int    `yaml:"imap_port"`
 	SMTPServer string `yaml:"smtp_server"`
 	SMTPPort   int    `yaml:"smtp_port"`
 	Username   string `yaml:"username"`

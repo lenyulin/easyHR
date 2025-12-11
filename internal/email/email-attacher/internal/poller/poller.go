@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"time"
 
-	"easyHR/pkg/email-attacher/domain"
-	"easyHR/pkg/email-attacher/internal/config"
-	"easyHR/pkg/email-attacher/internal/factory"
-	"easyHR/pkg/email-attacher/internal/retry"
-	"easyHR/pkg/email-attacher/internal/storage"
+	"easyHR/internal/email/email-attacher/domain"
+	"easyHR/internal/email/email-attacher/internal/config"
+	"easyHR/internal/email/email-attacher/internal/factory"
+	"easyHR/internal/email/email-attacher/internal/retry"
+	"easyHR/internal/email/email-attacher/internal/storage"
 	"easyHR/pkg/logger"
 )
 
@@ -144,8 +144,8 @@ func (p *Poller) doPoll() {
 						Val: len(email.Attachments),
 					})
 				for _, att := range email.Attachments {
-					// 构建附件保存路径（服务商/邮件ID/附件名）
-					savePath := filepath.Join(p.attachmentStorage.GetBasePath(), provider, strconv.Itoa(int(email.ID)))
+					// 构建附件保存路径（服务商/邮件ID/邮件主题/附件名）
+					savePath := filepath.Join(p.attachmentStorage.GetBasePath(), provider, strconv.Itoa(int(email.ID)), email.Subject, att.Name)
 					err := p.attachmentStorage.SaveAttachment(client, att, savePath)
 					if err != nil {
 						p.logger.Debug("附件下载失败",

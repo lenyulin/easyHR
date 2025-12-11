@@ -4,6 +4,16 @@ import (
 	"time"
 )
 
+// Message 定义消息持久化的结构
+type Message struct {
+	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id" bson:"_id,omitempty"`
+	SessionID string    `gorm:"index;not null;type:varchar(36)" json:"session_id" bson:"session_id"`
+	Role      string    `gorm:"type:varchar(20)" json:"role" bson:"role"` // user, system, assistant
+	Content   string    `gorm:"type:text" json:"content" bson:"content"`
+	Input     string    `gorm:"type:text" json:"input" bson:"input"`
+	CreatedAt time.Time `json:"created_at" bson:"created_at"`
+}
+
 // MessageProcessor 消息处理器，负责消息的转换、验证和历史管理
 // 提供将消息转换为不同格式、验证消息有效性和管理消息历史的功能
 // 是消息处理的核心组件，连接AIHelper和存储层

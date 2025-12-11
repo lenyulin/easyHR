@@ -32,3 +32,15 @@ smtp_config:
   use_tls: true
   from_email: "1733889704@qq.com"
   from_name: "easyHR招聘组"
+
+agents:
+  - role: "primary"
+    model_type: "gpt4"
+    api_key: "test_key"
+    base_url: "https://api.openai.com/v1"
+    session_id: "primary_session"
+  - role: "secondary"
+    model_type: "gpt4"
+    api_key: "test_key"
+    base_url: "https://api.openai.com/v1"
+    session_id: "secondary_session"

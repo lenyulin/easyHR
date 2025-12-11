@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"easyHR/pkg/email-attacher/config"
+	"easyHR/internal/email/email-attacher/config"
 )
 
 // InitInternalConfig 转换外部配置为内部配置

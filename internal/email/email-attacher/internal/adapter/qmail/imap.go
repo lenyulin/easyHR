@@ -1,8 +1,8 @@
 package qq
 
 import (
-	"easyHR/pkg/email-attacher/internal/config"
-	"easyHR/pkg/email-attacher/internal/imap"
+	"easyHR/internal/email/email-attacher/internal/config"
+	"easyHR/internal/email/email-attacher/internal/imap"
 
 	"github.com/emersion/go-imap/v2/imapclient"
 )

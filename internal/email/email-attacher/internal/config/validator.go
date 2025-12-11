@@ -1,7 +1,7 @@
 package config
 
 import (
-	"easyHR/pkg/email-attacher/config"
+	"easyHR/internal/email/email-attacher/config"
 	"errors"
 	"fmt"
 	"os"

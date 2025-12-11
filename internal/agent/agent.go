@@ -2,131 +2,40 @@ package agent
 
 import (
 	"context"
-	"os"
-	"sync"
 	"time"
 
 	"github.com/cloudwego/eino/schema"
 )
 
-// StreamCallback 定义流式响应的回调函数
-type StreamCallback func(msg string)
-
-// Model 定义Agent的通用接口
-type Model interface {
-	GenerateResponse(ctx context.Context, messages []*schema.Message) (*schema.Message, error)
-	StreamResponse(ctx context.Context, messages []*schema.Message, cb StreamCallback) (string, error)
-	GetModelType() string
-}
-
 // Agent 封装了与Agent交互的核心逻辑
 type Agent struct {
-	model     Model                          // Agent接口，支持不同Agent实现
-	messages  []Message                      // 消息历史列表，存储用户和Agent的对话记录
-	mu        sync.RWMutex                   // 读写锁，保护消息历史并发访问
-	SessionID string                         // 会话唯一标识，用于绑定消息和上下文
-	saveFunc  func(Message) (Message, error) // 消息存储回调函数，默认异步发布到RabbitMQ
-	SysMsg    string                         // 系统默认提示词，用于指导Agent的行为
-}
-
-// Message 定义消息持久化的结构
-type Message struct {
-	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id" bson:"_id,omitempty"`
-	SessionID string    `gorm:"index;not null;type:varchar(36)" json:"session_id" bson:"session_id"`
-	Role      string    `gorm:"type:varchar(20)" json:"role" bson:"role"` // user, system, assistant
-	Content   string    `gorm:"type:text" json:"content" bson:"content"`
-	CreatedAt time.Time `json:"created_at" bson:"created_at"`
-}
-
-// Configuration 定义LLM服务的配置
-type Configuration struct {
-	ModelType string `mapstructure:"model_type" yaml:"model_type"` // e.g., "doubao", "gpt4"
-	APIKey    string `mapstructure:"api_key" yaml:"api_key"`
-	BaseURL   string `mapstructure:"base_url" yaml:"base_url"`
-	ModelName string `mapstructure:"model_name" yaml:"model_name"` // Specific model version
+	model     AIModel // 审模型列表
+	role      string  // 审模型角色
+	SysMsg    string  // 系统默认提示词，用于指导Agent的行为
+	SessionID string  // 会话ID
 }
 
 // NewAgent NewAgent 创建一个新的Agent实例
-func NewAgent(model Model, sessionID string, saveFunc func(Message) (Message, error)) *Agent {
-	// 如果saveFunc为nil，使用默认实现
-	if saveFunc == nil {
-		// 默认实现：返回消息本身，不做持久化
-		saveFunc = func(msg Message) (Message, error) {
-			return msg, nil
-		}
-	}
-
+func NewAgent(model AIModel, sessionID string, role string, sysMsg string) *Agent {
 	return &Agent{
 		model:     model,
-		messages:  []Message{},
+		SysMsg:    sysMsg, // 设置默认系统提示词
 		SessionID: sessionID,
-		saveFunc:  saveFunc,
-		SysMsg:    DefaultSystemPrompt, // 设置默认系统提示词
+		role:      role,
 	}
 }
 
-// AddMessage 添加消息到历史记录，支持持久化
-func (a *Agent) AddMessage(msg Message, save bool) (Message, error) {
-	// 设置消息的创建时间和会话ID
-	msg.CreatedAt = time.Now()
-	if msg.SessionID == "" {
-		msg.SessionID = a.SessionID
+// AddTask 处理新的用户请求
+func (a *Agent) AddTask(ctx context.Context, filePath string) (*Message, error) {
+	// 构造Review的输入
+	// 使用 a.SysMsg 作为 System prompt
+	schemaMsgs := []*schema.Message{
+		{Role: schema.System, Content: a.SysMsg},
+		{Role: schema.User, Content: filePath},
 	}
-
-	// 添加到内存中的消息历史
-	a.mu.Lock()
-	a.messages = append(a.messages, msg)
-	a.mu.Unlock()
-
-	// 如果需要持久化，调用saveFunc
-	if save {
-		return a.saveFunc(msg)
-	}
-
-	return msg, nil
-}
-
-// GenerateResponse 生成AI响应，非流式
-func (a *Agent) GenerateResponse(ctx context.Context, userMsg string, save bool) (*Message, error) {
-	// 创建用户消息
-	userMessage := Message{
-		SessionID: a.SessionID,
-		Role:      "user",
-		Content:   userMsg,
-		CreatedAt: time.Now(),
-	}
-
-	// 添加用户消息到历史
-	if _, err := a.AddMessage(userMessage, save); err != nil {
-		return nil, err
-	}
-
-	// 转换为schema.Message格式
-	var schemaMsgs []*schema.Message
-
-	// 1. 添加系统提示词
-	if a.SysMsg != "" {
-		schemaMsgs = append(schemaMsgs, &schema.Message{
-			Role:    schema.RoleType("system"),
-			Content: a.SysMsg,
-		})
-	}
-
-	// 2. 添加历史消息（排除系统提示词，避免重复）
-	a.mu.RLock()
-	for _, msg := range a.messages {
-		// 跳过系统消息，因为我们已经单独添加了
-		if msg.Role != "system" {
-			schemaMsgs = append(schemaMsgs, &schema.Message{
-				Role:    schema.RoleType(msg.Role),
-				Content: msg.Content,
-			})
-		}
-	}
-	a.mu.RUnlock()
 
 	// 调用模型生成响应
-	aiResp, err := a.model.GenerateResponse(ctx, schemaMsgs)
+	resp, err := a.model.GenerateResponse(ctx, schemaMsgs)
 	if err != nil {
 		return nil, err
 	}
@@ -134,85 +43,10 @@ func (a *Agent) GenerateResponse(ctx context.Context, userMsg string, save bool)
 	// 创建AI响应消息
 	aiMessage := Message{
 		SessionID: a.SessionID,
-		Role:      "assistant",
-		Content:   aiResp.Content,
+		Role:      a.role,
+		Input:     filePath,
+		Content:   resp.Content,
 		CreatedAt: time.Now(),
 	}
-
-	// 添加AI响应到历史
-	if _, err := a.AddMessage(aiMessage, save); err != nil {
-		return nil, err
-	}
-
 	return &aiMessage, nil
-}
-
-// GetMessages 获取当前会话的所有消息历史
-func (a *Agent) GetMessages() []Message {
-	a.mu.RLock()
-	defer a.mu.RUnlock()
-
-	// 返回消息的副本，避免外部修改
-	msgs := make([]Message, len(a.messages))
-	copy(msgs, a.messages)
-	return msgs
-}
-
-// SetSaveFunc 设置消息存储回调函数
-func (a *Agent) SetSaveFunc(saveFunc func(Message) (Message, error)) {
-	if saveFunc != nil {
-		a.saveFunc = saveFunc
-	}
-}
-
-// SetSysMsg 设置系统提示词
-func (a *Agent) SetSysMsg(sysMsg string) {
-	a.mu.Lock()
-	a.SysMsg = sysMsg
-	a.mu.Unlock()
-}
-
-// GetSysMsg 获取当前系统提示词
-func (a *Agent) GetSysMsg() string {
-	a.mu.RLock()
-	defer a.mu.RUnlock()
-	return a.SysMsg
-}
-
-// ClearMessages 清空消息历史
-func (a *Agent) ClearMessages() {
-	a.mu.Lock()
-	a.messages = []Message{}
-	a.mu.Unlock()
-}
-
-// ReadFile 读取文件内容
-func ReadFile(filePath string) (string, error) {
-	// 检查文件是否存在
-	if _, err := os.Stat(filePath); os.IsNotExist(err) {
-		return "", err
-	}
-
-	// 读取文件内容
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		return "", err
-	}
-
-	return string(content), nil
-}
-
-// GenerateResponseWithFile 结合文件内容生成AI响应，非流式
-func (a *Agent) GenerateResponseWithFile(ctx context.Context, userMsg, filePath string, save bool) (*Message, error) {
-	// 读取文件内容
-	fileContent, err := ReadFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	// 构建带有文件内容的完整提示词
-	fullPrompt := "文件路径：" + filePath + "\n文件内容：" + fileContent + "\n\n" + userMsg
-
-	// 调用普通生成方法
-	return a.GenerateResponse(ctx, fullPrompt, save)
 }

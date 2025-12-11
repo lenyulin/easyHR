@@ -3,7 +3,7 @@ package storage
 import (
 	"os"
 
-	"easyHR/pkg/email-attacher/domain"
+	"easyHR/internal/email/email-attacher/domain"
 	"easyHR/pkg/logger"
 )
 

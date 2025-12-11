@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"easyHR/pkg/email-attacher/domain"
-	qq "easyHR/pkg/email-attacher/internal/adapter/qmail"
+	"easyHR/internal/email/email-attacher/domain"
+	qq "easyHR/internal/email/email-attacher/internal/adapter/qmail"
 )
 
 // NewEmailClient 根据服务商类型创建客户端实例

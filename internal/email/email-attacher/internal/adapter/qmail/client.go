@@ -3,9 +3,9 @@ package qq
 import (
 	"bytes"
 	"context"
-	"easyHR/pkg/email-attacher/domain"
-	"easyHR/pkg/email-attacher/internal/config"
-	"easyHR/pkg/email-attacher/internal/retry"
+	"easyHR/internal/email/email-attacher/domain"
+	"easyHR/internal/email/email-attacher/internal/config"
+	"easyHR/internal/email/email-attacher/internal/retry"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -19,10 +19,15 @@ import (
 	"github.com/emersion/go-imap/v2/imapclient"
 )
 
-var searchCriteria = &imap.SearchCriteria{Or: [][2]imap.SearchCriteria{{
-	{Body: []string{"校园招聘"}},
-	{Body: []string{"Campus Recruitment"}},
-}}}
+// 搜索条件
+// 从收件箱中筛选出未读邮件，且邮件主题包含"校园招聘"或"Campus Recruitment"
+var searchCriteria = &imap.SearchCriteria{
+	NotFlag: []imap.Flag{imap.FlagSeen},
+	Or: [][2]imap.SearchCriteria{{
+		{Body: []string{"校园招聘"}},
+		{Body: []string{"Campus Recruitment"}},
+	}},
+}
 
 type QQEmailClient struct {
 	provider   string
@@ -69,9 +74,7 @@ func (q *QQEmailClient) ListUnreadEmails() ([]domain.Email, error) {
 	if err != nil {
 		return nil, err
 	}
-	uids, err := q.imapClient.UIDSearch(&imap.SearchCriteria{
-		NotFlag: []imap.Flag{imap.FlagSeen},
-	}, nil).Wait()
+	uids, err := q.imapClient.UIDSearch(searchCriteria, nil).Wait()
 
 	if err != nil {
 		return nil, err

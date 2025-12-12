@@ -13,10 +13,11 @@ type Agent struct {
 	role      string  // 审模型角色
 	SysMsg    string  // 系统默认提示词，用于指导Agent的行为
 	SessionID string  // 会话ID
+	ModelName string
 }
 
-// NewAgent NewAgent 创建一个新的Agent实例
-func NewAgent(model AIModel, sessionID string, role string, sysMsg string) *Agent {
+// newAgent newAgent 创建一个新的Agent实例
+func newAgent(model AIModel, sessionID string, role string, sysMsg string) *Agent {
 	return &Agent{
 		model:     model,
 		SysMsg:    sysMsg, // 设置默认系统提示词
@@ -26,7 +27,7 @@ func NewAgent(model AIModel, sessionID string, role string, sysMsg string) *Agen
 }
 
 // AddTask 处理新的用户请求
-func (a *Agent) AddTask(ctx context.Context, filePath string) (*Message, error) {
+func (a *Agent) AddTask(ctx context.Context, filePath string, usrPrompt string) (*Message, error) {
 	// 构造Review的输入
 	// 使用 a.SysMsg 作为 System prompt
 	schemaMsgs := []*schema.Message{

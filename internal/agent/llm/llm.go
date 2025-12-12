@@ -1,8 +1,11 @@
 package llm
 
-import "context"
+import (
+	"context"
+)
 
-type LLMService interface {
-	Chat(ctx context.Context, modelName string, sessionID string, content string) (string, error)
-	ProcessFileAndGenerate(ctx context.Context, modelName string, sessionID string, filePath string, prompt string) (string, error)
+// LLMProvider 是所有 AI 模型的通用接口
+type LLMProvider interface {
+	// AnalyzeResume 接收文件流，返回结构化的 ResumeAnalysis
+	AnalyzeResume(ctx context.Context, role string, sysPrompt string, usrPrompt string, file string, opt ...interface{}) (*ResumeAnalysis, error)
 }

@@ -2,6 +2,9 @@ package agent
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
+
 	"easyHR/internal/agent/llm"
 	"easyHR/internal/agent/llm/gemini"
 
@@ -21,6 +24,7 @@ type Configuration struct {
 	APIKey    string `mapstructure:"api_key" yaml:"api_key"`
 	BaseURL   string `mapstructure:"base_url" yaml:"base_url"`
 }
+
 type model struct {
 	provider  llm.LLMProvider
 	modelType string
@@ -44,14 +48,40 @@ func NewAiModel(config Configuration) AIModel {
 
 // GenerateResponse 生成AI响应，非流式
 func (a *model) GenerateResponse(ctx context.Context, messages []*schema.Message) (*schema.Message, error) {
-	//拼接系统prompt和用户消息
-	var prompt string
+	if len(messages) == 0 {
+		return nil, errors.New("messages is empty")
+	}
+
+	var sysMsg, filePath, usrPrompt string
 	for _, msg := range messages {
-		if msg.Role == "system" {
-			prompt += msg.Content + "\n"
+		switch msg.Name {
+		case "sysMsg":
+			sysMsg = msg.Content
+		case "filePath":
+			filePath = msg.Content
+		case "usrPrompt":
+			usrPrompt = msg.Content
 		}
 	}
-	return nil, nil
+
+	if sysMsg == "" || filePath == "" || usrPrompt == "" {
+		return nil, errors.New("sysMsg, filePath or usrPrompt is empty")
+	}
+
+	analysis, err := a.provider.AnalyzeResume(ctx, "", sysMsg, usrPrompt, filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	respBytes, err := json.Marshal(analysis)
+	if err != nil {
+		return nil, err
+	}
+
+	return &schema.Message{
+		Role:    schema.Assistant,
+		Content: string(respBytes),
+	}, nil
 }
 
 func (a *model) GetModelType() string {

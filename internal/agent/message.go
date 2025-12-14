@@ -2,21 +2,158 @@ package agent
 
 import (
 	"time"
+
+	"github.com/google/generative-ai-go/genai"
 )
+
+var EvaluationSchema = &genai.Schema{
+	Type: genai.TypeObject,
+	Properties: map[string]*genai.Schema{
+		"candidate_name": {
+			Type:        genai.TypeString,
+			Description: "The full name of the candidate found in the resume.",
+		},
+		"match_score": {
+			Type:        genai.TypeInteger,
+			Description: "A score from 0 to 100 indicating fit for the role.",
+		},
+		"skills": {
+			Type: genai.TypeArray,
+			Items: &genai.Schema{
+				Type: genai.TypeString,
+			},
+			Description: "List of technical skills extracted.",
+		},
+		"projects": {
+			Type: genai.TypeArray,
+			Items: &genai.Schema{
+				Type: genai.TypeObject,
+				Properties: map[string]*genai.Schema{
+					"name": {
+						Type:        genai.TypeString,
+						Description: "The name of the project.",
+					},
+					"description": {
+						Type:        genai.TypeString,
+						Description: "A description of the project.",
+					},
+					"skills": {
+						Type: genai.TypeArray,
+						Items: &genai.Schema{
+							Type: genai.TypeString,
+						},
+						Description: "List of technical skills used in the project.",
+					},
+					"comment": {
+						Type:        genai.TypeString,
+						Description: "Your comment on the project.",
+					},
+				},
+				Required: []string{"name", "description", "skills", "comment"},
+			},
+		},
+		"campus_experience": {
+			Type: genai.TypeArray,
+			Items: &genai.Schema{
+				Type: genai.TypeObject,
+				Properties: map[string]*genai.Schema{
+					"name": {
+						Type:        genai.TypeString,
+						Description: "The name of the campus experience.",
+					},
+					"description": {
+						Type:        genai.TypeString,
+						Description: "A description of the campus experience.",
+					},
+					"skills": {
+						Type: genai.TypeArray,
+						Items: &genai.Schema{
+							Type: genai.TypeString,
+						},
+						Description: "List of skills used in the campus experience.",
+					},
+					"comment": {
+						Type:        genai.TypeString,
+						Description: "Your comment on the campus experience.",
+					},
+				},
+				Required: []string{"name", "description", "skills", "comment"},
+			},
+		},
+		"work_experience": {
+			Type: genai.TypeArray,
+			Items: &genai.Schema{
+				Type: genai.TypeObject,
+				Properties: map[string]*genai.Schema{
+					"name": {
+						Type:        genai.TypeString,
+						Description: "The name of the work experience/job/internal.",
+					},
+					"description": {
+						Type:        genai.TypeString,
+						Description: "A description of the work experience/job/internal.",
+					},
+					"skills": {
+						Type: genai.TypeArray,
+						Items: &genai.Schema{
+							Type: genai.TypeString,
+						},
+						Description: "List of skills used in the work experience/job/internal.",
+					},
+					"comment": {
+						Type:        genai.TypeString,
+						Description: "Your comment on the work experience/job/internal.",
+					},
+				},
+				Required: []string{"name", "description", "skills", "comment"},
+			},
+		},
+		"summary": {
+			Type:        genai.TypeString,
+			Description: "Brief reasoning for the score.",
+		},
+	},
+	// 定义必须存在的字段
+	Required: []string{"candidate_name", "match_score", "skills", "projects", "campus_experience", "work_experience", "summary"},
+}
+
+type Project struct {
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Skills      []string `json:"skills"`
+	Comment     string   `json:"comment"`
+}
+
+type Experience struct {
+	Name        string   `json:"name"`
+	Description string   `json:"description"`
+	Skills      []string `json:"skills"`
+	Comment     string   `json:"comment"`
+}
+
+type CandidateEvaluation struct {
+	CandidateName    string       `json:"candidate_name"`
+	MatchScore       int          `json:"match_score"`
+	Skills           []string     `json:"skills"`
+	Projects         []Project    `json:"projects"`
+	CampusExperience []Experience `json:"campus_experience"`
+	WorkExperience   []Experience `json:"work_experience"`
+	Summary          string       `json:"summary"`
+}
 
 // Message 定义消息持久化的结构
 type Message struct {
-	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id" bson:"_id,omitempty"`
-	SessionID string    `gorm:"index;not null;type:varchar(36)" json:"session_id" bson:"session_id"`
-	Role      string    `gorm:"type:varchar(20)" json:"role" bson:"role"` // user, system, assistant
-	Content   string    `gorm:"type:text" json:"content" bson:"content"`
+	ID        uint   `gorm:"primaryKey;autoIncrement" json:"id" bson:"_id,omitempty"`
+	SessionID string `gorm:"index;not null;type:varchar(36)" json:"session_id" bson:"session_id"`
+	Role      string `gorm:"type:varchar(20)" json:"role" bson:"role"` // user, system, assistant
+	Content   string `gorm:"type:text" json:"content" bson:"content"`
+
+	// Structured evaluation result
+	Evaluation *CandidateEvaluation `gorm:"serializer:json" json:"evaluation,omitempty" bson:"evaluation,omitempty"`
+
 	Input     string    `gorm:"type:text" json:"input" bson:"input"`
 	CreatedAt time.Time `json:"created_at" bson:"created_at"`
 }
-
-// MessageProcessor 消息处理器，负责消息的转换、验证和历史管理
-// 提供将消息转换为不同格式、验证消息有效性和管理消息历史的功能
-// 是消息处理的核心组件，连接AIHelper和存储层
 
 type MessageProcessor struct{}
 
@@ -24,97 +161,4 @@ type MessageProcessor struct{}
 // 初始化消息处理器，返回实例
 func NewMessageProcessor() *MessageProcessor {
 	return &MessageProcessor{}
-}
-
-// ConvertToSchemaMessage 将内部Message转换为schema.Message格式
-// 接收内部Message实例，返回schema.Message实例
-func (p *MessageProcessor) ConvertToSchemaMessage(msg Message) *SchemaMessage {
-	return &SchemaMessage{
-		Role:    msg.Role,
-		Content: msg.Content,
-	}
-}
-
-// ConvertToInternalMessage 将外部消息转换为内部Message格式
-// 接收角色、内容和会话ID，返回内部Message实例
-func (p *MessageProcessor) ConvertToInternalMessage(role, content, sessionID string) Message {
-	return Message{
-		SessionID: sessionID,
-		Role:      role,
-		Content:   content,
-		CreatedAt: time.Now(),
-	}
-}
-
-// ValidateMessage 验证消息的有效性
-// 检查消息角色是否合法，内容是否为空
-// 返回验证结果和错误信息
-func (p *MessageProcessor) ValidateMessage(msg Message) (bool, error) {
-	// 检查角色是否合法
-	if msg.Role != "user" && msg.Role != "system" && msg.Role != "assistant" {
-		return false, ErrInvalidRole
-	}
-
-	// 检查内容是否为空
-	if msg.Content == "" {
-		return false, ErrEmptyContent
-	}
-
-	// 检查会话ID是否为空
-	if msg.SessionID == "" {
-		return false, ErrEmptySessionID
-	}
-
-	return true, nil
-}
-
-// FilterMessagesByRole 根据角色过滤消息
-// 接收消息列表和角色，返回过滤后的消息列表
-func (p *MessageProcessor) FilterMessagesByRole(messages []Message, role string) []Message {
-	var filtered []Message
-	for _, msg := range messages {
-		if msg.Role == role {
-			filtered = append(filtered, msg)
-		}
-	}
-	return filtered
-}
-
-// FilterMessagesByTimeRange 根据时间范围过滤消息
-// 接收消息列表、开始时间和结束时间，返回过滤后的消息列表
-func (p *MessageProcessor) FilterMessagesByTimeRange(messages []Message, startTime, endTime time.Time) []Message {
-	var filtered []Message
-	for _, msg := range messages {
-		if msg.CreatedAt.After(startTime) && msg.CreatedAt.Before(endTime) {
-			filtered = append(filtered, msg)
-		}
-	}
-	return filtered
-}
-
-// GetLatestMessages 获取最近的N条消息
-// 接收消息列表和数量，返回最近的N条消息
-func (p *MessageProcessor) GetLatestMessages(messages []Message, count int) []Message {
-	// 如果消息数量小于等于count，返回所有消息
-	if len(messages) <= count {
-		return messages
-	}
-
-	// 返回最近的count条消息
-	return messages[len(messages)-count:]
-}
-
-// 自定义错误类型，用于消息验证
-var (
-	ErrInvalidRole    = Error("invalid role")
-	ErrEmptyContent   = Error("empty content")
-	ErrEmptySessionID = Error("empty session ID")
-)
-
-// SchemaMessage 定义外部消息格式的别名
-// 方便与外部系统交互
-// 是对github.com/cloudwego/eino/schema.Message的封装
-type SchemaMessage struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
 }

@@ -30,9 +30,11 @@ func newAgent(model AIModel, sessionID string, role string, sysMsg string) *Agen
 func (a *Agent) AddTask(ctx context.Context, filePath string, usrPrompt string) (*Message, error) {
 	// 构造Review的输入
 	// 使用 a.SysMsg 作为 System prompt
+	// 按照需求传入sysMsg, filePath, usrPrompt，并设置Name以便后续解析
 	schemaMsgs := []*schema.Message{
-		{Role: schema.System, Content: a.SysMsg},
-		{Role: schema.User, Content: filePath},
+		{Role: schema.System, Content: a.SysMsg, Name: "sysMsg"},
+		{Role: schema.User, Content: filePath, Name: "filePath"},
+		{Role: schema.User, Content: usrPrompt, Name: "usrPrompt"},
 	}
 
 	// 调用模型生成响应

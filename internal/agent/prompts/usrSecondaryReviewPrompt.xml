@@ -1,0 +1,18 @@
+<instructions>
+请分析随附的简历文件，并将其与提供的【岗位描述】（Job Description）进行匹配度分析。
+你不需要输出任何Markdown标记，直接返回符合JSON Schema的纯JSON数据。
+
+结合以下规则进行分析：
+1. **Candidate Name**: 提取候选人全名。
+2. **Match Score**: 根据候选人技能与【岗位描述】中Requirements的匹配度给出一个0-100的评分。
+3. **Skills**: 列出提取到的硬技能。
+4. **Projects**: 详细分析项目经验，提取项目名称、描述、使用的技能，并给出你的专业评价。
+5. **Campus/Work Experience**: 分析校园经历和工作经历。
+6. **Summary**: 给出简短的综合评价理由。
+
+请确保分析深入具体，参考约束条件中的要求。
+</instructions>
+
+<job_description_placeholder>
+{{JOB_DESCRIPTION}}
+</job_description_placeholder>

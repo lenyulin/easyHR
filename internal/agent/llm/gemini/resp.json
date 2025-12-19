@@ -1,0 +1,17 @@
+{
+  "candidate_name" : "雷育林",
+  "match_score" : 85,
+  "skills" : [ "Go语言", "Gin", "Redis", "Kafka", "gRPC", "Protobuf", "微服务开发框架", "腾讯云SDK", "火山引擎TOS SDK", "DDD (领域驱动设计)", "TDD (测试驱动开发)", "wrk (压测工具)", "Wire (依赖注入)", "Mock (测试)", "自动化测试", "Prometheus", "OpenTelemetry", "Grafana", "分布式任务调度", "cron", "Kubernetes (k8s)", "ElasticSearch", "olivere (ElasticSearch Go客户端)", "MySQL", "JWT", "Lua", "etcd", "viper", "Zap", "BigCache", "Canal", "Cloud Computing", "Advanced Algorithms", "Advanced IoT", "Advanced Machine Learning", "云架构设计", "组件调优", "高可用设计", "扩展云方案", "智能物联网系统开发", "协议解析", "算法设计", "性能调优", "机器学习模型开发" ],
+  "projects" : [ {
+    "name" : "微抖音(wedy)",
+    "description" : "基于Go语言和grpc+protobuf构建的微服务架构系统，采用DDD及TDD设计方法、面向接口与依赖注入模式开发，通过viper+etcd配置加载、微服务治理策略及Zap、Prometheus等组件保障高可用、高并发与弹性扩展能力，支撑用户管理、评论、视频管理、互动四大核心功能并提升系统可观测性。用户管理模块采用JWT实现用户权限管理，Lua+Redis滑动窗口限流防护系统，设计带验证码有效期控制的短信登录方案并以Lua脚本解决并发问题，通过多级熔断降级策略实现高可用性。评论&互动模块基于MySQL+Redis多级缓存架构（L1本地缓存+L2分布式缓存），结合一致性哈希负载均衡提升缓存命中率，实现一级/二级评论快速加载；通过Kafka异步处理+批量消费策略完成流量削峰。视频管理模块实现视频发布、搜索等核心功能，通过定时任务计算热门榜单，采用腾讯云OSS及火山引擎TOS存储视频并结合异步TCC模式优化上传流程，提升系统处理效率与稳定性。",
+    "skills" : [ "Go", "gRPC", "Protobuf", "DDD", "TDD", "Viper", "etcd", "Zap", "Prometheus", "JWT", "Lua", "Redis", "MySQL", "Kafka", "腾讯云OSS", "火山引擎TOS", "TCC" ],
+    "comment" : "该项目展示了候选人在微服务架构设计、Go语言开发、分布式系统组件集成（如消息队列、缓存、数据库）、以及性能优化和可观测性方面的实践能力。特别是对DDD/TDD、多种限流熔断策略、多级缓存、异步处理和TCC事务模式的应用，体现了较强的系统设计和问题解决能力。项目描述详细，技术点丰富且具体。"
+  }, {
+    "name" : "秒杀商城",
+    "description" : "作为微抖音(wedy)的一个子系统，实现了秒杀商城系统的功能，整体技术架构与微抖音一致。在Web网管层实现请求前置过滤（拦截未授权用户及无效活动请求，降低后端负载）。自行封装的HybridCache (BigCache+Redis)缓存架构提升活动信息访问效率，通过Canal+Kafka实现缓存秒级同步，采用乐观锁保障分布式数据一致性。结合异步TCC事务模式处理订单、库存与优惠券扣减，核心接口响应时间缩短，系统吞吐量提升。通过Kafka实现TCC事务的持久化储存，并通过延迟消费实现超时自动查询订单状态并实现超时取消功能。",
+    "skills" : [ "Web", "HybridCache (BigCache)", "Redis", "Canal", "Kafka", "TCC", "乐观锁" ],
+    "comment" : "作为微抖音的子系统，该项目进一步深化了候选人在高并发场景下的系统设计能力，特别是缓存架构优化（HybridCache, Canal+Kafka同步）、分布式事务处理（TCC模式）和数据一致性（乐观锁）方面的经验，这些都是秒杀系统中的关键技术点。请求前置过滤也体现了对系统入口流量控制的理解，有助于减轻后端压力。项目描述具体，技术应用深入。"
+  } ],
+  "summary" : "候选人在Go语言、微服务、分布式系统、数据库、缓存、消息队列、监控和测试等方面的技术栈与岗位要求高度匹配。项目经验丰富且深入，展示了对DDD/TDD、分布式事务（TCC）、多级缓存、限流熔断等复杂系统设计和实现能力的掌握。硕士教育背景也提供了扎实的理论基础。主要待确认点是其'3+年软件开发经验'的实际工作年限，鉴于其仍在读硕士且项目日期可能存在笔误，需进一步核实其全职工作经验的累积情况。"
+}

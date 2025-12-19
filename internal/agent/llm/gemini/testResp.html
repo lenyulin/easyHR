@@ -1,0 +1,260 @@
+leiyulin@192 agent % go test -run TestAiAgentManager_Analysis
+
+2025-12-20T00:22:13.711+0800 INFO logger/zap_logger.go:20 发送简历至SecondaryReviewer评审
+2025-12-20T00:22:13.711+0800 INFO logger/zap_logger.go:20 等待SecondaryReviewer返回审评结果
+--- 原始 JSON 字符串 ---
+{
+"candidate_name": "雷育林",
+"match_score": 75,
+"skills": [
+"Go",
+"Gin",
+"Redis",
+"Kafka",
+"gRPC",
+"Protobuf",
+"Viper",
+"etcd",
+"Zap",
+"Prometheus",
+"JWT",
+"Lua",
+"MySQL",
+"TCC",
+"腾讯云OSS",
+"火山引擎TOS",
+"HybridCache (BigCache)",
+"Canal",
+"乐观锁",
+"DDD (领域驱动设计)",
+"TDD (测试驱动开发)",
+"wrk (压测工具)",
+"wire (依赖注入)",
+"mock (测试)",
+"自动化测试",
+"OpenTelemetry",
+"Grafana",
+"cron",
+"k8s",
+"ElasticSearch",
+"olivere"
+],
+"projects": [
+{
+"name": "微抖音(wedy)",
+"description": "采用Go语言构建的基于grpc+protobuf的微服务架构系统，采用DDD 及TDD 设计方法、面向接口与依赖注入模式开发，通过viper+etcd 配置加载、微服务治理策略及 Zap、Prometheus
+等组件保障高可用、高并发与弹性扩展能力，支撑用户管理、评论、视频管理、互动四大核心功能并提升系统可观测性。用户管理方面，采用JWT 实现用户权限管理、Lua+Redis 滑动窗口限流防护系统，设计带验证码有效期控制的短信登录方案并以 Lua
+脚本解决并发问题，通过多级熔断降级策略实现高可用性。评论&互动方面，基于MySQL+Redis 多级缓存架构(L1本地缓存+L2分布式缓存)，结合一致性哈希负载均衡提升缓存命中率，实现一级 /
+二级评论快速加载；通过Kafka异步处理+批量消费策略完成流量削峰。视频管理方面，实现视频发布、搜索等核心功能，通过定时任务计算热门榜单，采用腾讯云OSS 及火山引擎 TOS存储视频并结合异步 TCC
+模式优化上传流程，提升系统处理效率与稳定性。",
+"skills": [
+"Go",
+"gRPC",
+"Protobuf",
+"DDD",
+"TDD",
+"Viper",
+"etcd",
+"Zap",
+"Prometheus",
+"JWT",
+"Lua",
+"Redis",
+"MySQL",
+"Kafka",
+"TCC",
+"腾讯云OSS",
+"火山引擎TOS"
+],
+"comment":
+"该项目展示了候选人在微服务架构设计与实现方面的扎实能力，涵盖了从服务治理、配置管理、认证授权、缓存、消息队列到分布式事务处理等多个关键技术点。对DDD和TDD的应用表明了对软件工程最佳实践的理解。但项目描述中关于“高可用、高并发与弹性扩展能力”等词汇缺乏具体数据支撑，无法量化实际效果。项目日期（2024.11
+- 至今）存在明显问题，需核实是笔误还是未来计划。"
+},
+{
+"name": "秒杀商城",
+"description": "作为微抖音(wedy)的一个子系统，实现了秒杀商城系统的功能，整体技术架构与微抖音一致。在 Web 网管层实现请求前置过滤(拦截未授权用户及无效活动请求，降低后端负载)。自行封装的 HybridCache
+(BigCache+Redis)缓存架构提升活动信息访问效率，通过Canal+Kafka 实现缓存秒级同步，采用乐观锁保障分布式数据一致性。结合异步 TCC
+事务模式处理订单、库存与优惠券扣减，核心接口响应时间缩短，系统吞吐量提升。通过Kafka实现TCC事务的持久化储存，并通过延迟消费实现超时自动查询订单状态并实现超时取消功能。",
+"skills": [
+"HybridCache (BigCache)",
+"Redis",
+"Canal",
+"Kafka",
+"乐观锁",
+"TCC"
+],
+"comment":
+"该项目进一步强化了候选人在高并发、数据一致性、缓存策略和分布式事务处理方面的经验。特别是对HybridCache的封装和Canal+Kafka的缓存同步，以及TCC事务的深入应用，体现了对复杂业务场景的技术解决能力。项目描述中关于“系统吞吐量提升”等词汇缺乏具体数据支撑，无法量化实际效果。项目日期（2025.04
+- 至今）存在明显问题，需核实是笔误还是未来计划。"
+}
+],
+"summary":
+"候选人雷育林在Go语言、微服务架构、分布式系统、缓存、消息队列和数据库等核心后端技术栈方面展现出扎实的技能和丰富的项目经验。对DDD、TDD等软件工程实践有较好的理解和应用。硕士教育背景与岗位要求高度匹配。主要不足在于简历中项目经验的日期存在明显问题（显示为未来日期），且缺乏明确、可验证的工作经历详情，导致实际工作年限和项目贡献的真实性存疑。若项目经验真实且日期为笔误，则匹配度将显著提升。",
+"campus_experience": [
+{
+"name": "马来亚大学 计算机科学与技术(应用技术) 硕士",
+"description": "主修课程包括CLOUD COMPUTING、ADVANCED ALGORITHMS、ADVANCED INTERNET OF THINGS、ADVANCED MACHINE
+LEARNING。主要掌握了云架构设计与组件调优技术，具备设计高可用、扩展云方案的能力；智能物联网系统开发与协议解析技术；算法设计与性能调优；机器学习模型开发与应用经验（GPA 3.76/CGPA 3.81）。",
+"skills": [
+"Cloud Computing",
+"Advanced Algorithms",
+"Advanced IoT",
+"Advanced Machine Learning",
+"云架构设计",
+"组件调优",
+"高可用设计",
+"扩展云方案",
+"智能物联网系统开发",
+"协议解析",
+"算法设计",
+"性能调优",
+"机器学习模型开发"
+],
+"comment": "硕士教育背景扎实，涵盖了软件开发相关的核心理论和前沿技术，为后续实践打下了良好基础。GPA表现优秀，体现了较强的学习能力和学术背景。"
+}
+],
+"work_experience": [
+{
+"name": "自我评价 - 工作经验",
+"description": "具备扎实的微服务开发经验，熟悉Go语言生态及主流云平台SDK开发。",
+"skills": [
+"微服务开发",
+"Go",
+"云平台SDK"
+],
+"comment": "此部分为候选人自我评价，缺乏具体公司、职位和时间信息，无法作为正式工作经验进行评估。建议在面试中深入了解其具体工作经历和职责。"
+}
+]
+}
+2025-12-20T00:22:44.472+0800 INFO logger/zap_logger.go:20 发送简历至PrimaryReviewer评审
+2025-12-20T00:22:44.472+0800 INFO logger/zap_logger.go:20 等待PrimaryReviewer返回审评结果
+--- 原始 JSON 字符串 ---
+{
+"candidate_name": "雷育林",
+"match_score": 70,
+"skills": [
+"Go",
+"Gin",
+"Redis",
+"Kafka",
+"gRPC",
+"Protobuf",
+"腾讯云SDK",
+"火山引擎SDK",
+"DDD (领域驱动设计)",
+"TDD (测试驱动开发)",
+"wrk (压测工具)",
+"wire (依赖注入)",
+"mock (测试)",
+"自动化测试",
+"Prometheus",
+"OpenTelemetry",
+"Grafana",
+"cron",
+"k8s",
+"ElasticSearch",
+"olivere",
+"Viper",
+"etcd",
+"Zap",
+"JWT",
+"Lua",
+"MySQL",
+"HybridCache (BigCache+Redis)",
+"Canal",
+"乐观锁",
+"TCC"
+],
+"projects": [
+{
+"name": "微抖音(wedy)",
+"description":
+"采用Go语言构建的基于grpc+protobuf的微服务架构系统，通过DDD及TDD设计方法、面向接口与依赖注入模式开发。利用viper+etcd配置加载、微服务治理策略及Zap、Prometheus等组件保障高可用、高并发与弹性扩展能力，支撑用户管理、评论、视频管理、互动四大核心功能并提升系统可观测性。用户管理方面，采用JWT实现用户权限管理，Lua+Redis滑动窗口限流防护系统，设计带验证码有效期控制的短信登录方案并以Lua脚本解决并发问题，通过多级熔断降级策略实现高可用性。评论&互动方面，基于MySQL+Redis多级缓存架构（L1本地缓存+L2分布式缓存），结合一致性哈希负载均衡提升缓存命中率，实现一级/二级评论快速加载；通过Kafka异步处理+批量消费策略完成流量削峰。视频管理方面，实现视频发布、搜索等核心功能，通过定时任务计算热门榜单，采用腾讯云OSS及火山引擎TOS存储视频并结合异步TCC模式优化上传流程，提升系统处理效率与稳定性。",
+"skills": [
+"Go",
+"grpc",
+"protobuf",
+"DDD",
+"TDD",
+"viper",
+"etcd",
+"Zap",
+"Prometheus",
+"JWT",
+"Lua",
+"Redis",
+"MySQL",
+"Kafka",
+"TCC",
+"腾讯云OSS",
+"火山引擎TOS"
+],
+"comment": "项目描述展示了候选人在Go语言微服务架构、分布式系统设计、缓存、消息队列、认证授权、监控等方面的扎实技能。对DDD和TDD设计方法的应用体现了良好的软件工程实践。然而，项目日期（2024.11 -
+至今）显示为未来，这使得项目经验的真实性和实际参与度存疑，无法作为实际工作经验进行评估。"
+},
+{
+"name": "秒杀商城",
+"description": "作为微抖音(wedy)的一个子系统，实现了秒杀商城系统的功能，整体技术架构与微抖音一致。在Web网管层实现请求前置过滤（拦截未授权用户及无效活动请求，降低后端负载）。自行封装HybridCache
+(BigCache+Redis)缓存架构提升活动信息访问效率，通过Canal+Kafka实现缓存秒级同步，采用乐观锁保障分布式数据一致性。结合异步TCC事务模式处理订单、库存与优惠券扣减，核心接口响应时间缩短，系统吞吐量提升。通过Kafka实现TCC事务的持久化储存，并通过延迟消费实现超时自动查询订单状态并实现超时取消功能。",
+"skills": [
+"HybridCache (BigCache+Redis)",
+"Canal",
+"Kafka",
+"乐观锁",
+"TCC"
+],
+"comment": "该项目进一步展示了候选人在高并发场景下的缓存优化、分布式事务、数据一致性保障等方面的经验。对请求过滤和异步处理的应用也体现了性能优化意识。与微抖音项目类似，项目日期（2025.04 -
+至今）显示为未来，这同样对其作为实际工作经验的有效性提出了疑问。"
+}
+],
+"summary":
+"候选人雷育林在Go语言、微服务架构、分布式系统、缓存、消息队列和数据库等核心后端技术栈方面展现出广泛且深入的技能。其硕士教育背景与岗位要求匹配。然而，简历中项目经验的日期均显示为未来，且缺乏明确、可验证的过往工作经历，这使得难以评估其是否满足“3年以上软件开发经验”的要求。虽然技能栈与岗位高度匹配，但实际工作经验的缺失或无法验证是主要风险点。",
+"campus_experience": [
+{
+"name": "马来亚大学",
+"description": "计算机科学与技术(应用技术) | 硕士 (2022.09 -
+至今)。主修课程包括云计算、高级算法、高级物联网、高级机器学习。掌握云架构设计与组件调优、高可用与扩展云方案、智能物联网系统开发与协议解析、算法设计与性能调优、机器学习模型开发与应用经验。",
+"skills": [
+"云计算",
+"高级算法",
+"高级物联网",
+"高级机器学习",
+"云架构设计",
+"组件调优",
+"高可用",
+"扩展云方案",
+"智能物联网系统开发",
+"协议解析",
+"算法设计",
+"性能调优",
+"机器学习模型开发"
+],
+"comment": "候选人拥有计算机科学硕士学位，且主修课程涵盖了云计算、高级算法等与后端开发相关的领域，教育背景与岗位要求高度匹配，并具备扎实的理论基础。"
+}
+],
+"work_experience": []
+}
+allMsgs [0x14000242000 0x14000411b20]
+evt: {789890345037991936 gemini secondary /Users/leiyulin/easyHR/easyHR/internal/agent/leiyulin_cv_b2.pdf
+{"candidate_name":"雷育林","match_score":75,"skills":["Go","Gin","Redis","Kafka","gRPC","Protobuf","Viper","etcd","Zap","Prometheus","JWT","Lua","MySQL","TCC","腾讯云OSS","火山引擎TOS","HybridCache
+(BigCache)","Canal","乐观锁","DDD (领域驱动设计)","TDD (测试驱动开发)","wrk (压测工具)","wire (依赖注入)","mock
+(测试)","自动化测试","OpenTelemetry","Grafana","cron","k8s","ElasticSearch","olivere"],"summary":"候选人雷育林在Go语言、微服务架构、分布式系统、缓存、消息队列和数据库等核心后端技术栈方面展现出扎实的技能和丰富的项目经验。对DDD、TDD等软件工程实践有较好的理解和应用。硕士教育背景与岗位要求高度匹配。主要不足在于简历中项目经验的日期存在明显问题（显示为未来日期），且缺乏明确、可验证的工作经历详情，导致实际工作年限和项目贡献的真实性存疑。若项目经验真实且日期为笔误，则匹配度将显著提升。"}
+2025-12-20 00:22:44.472101 +0800 CST m=+31.831679626}
+2025/12/20 00:23:15 [x] Sent
+{"SessionID":"789890345037991936","ModelType":"gemini","Role":"secondary","Input":"/Users/leiyulin/easyHR/easyHR/internal/agent/leiyulin_cv_b2.pdf","Output":"{\"candidate_name\":\"雷育林\",\"match_score\":75,\"skills\":[\"Go\",\"Gin\",\"Redis\",\"Kafka\",\"gRPC\",\"Protobuf\",\"Viper\",\"etcd\",\"Zap\",\"Prometheus\",\"JWT\",\"Lua\",\"MySQL\",\"TCC\",\"腾讯云OSS\",\"火山引擎TOS\",\"HybridCache
+(BigCache)\",\"Canal\",\"乐观锁\",\"DDD (领域驱动设计)\",\"TDD (测试驱动开发)\",\"wrk (压测工具)\",\"wire (依赖注入)\",\"mock
+(测试)\",\"自动化测试\",\"OpenTelemetry\",\"Grafana\",\"cron\",\"k8s\",\"ElasticSearch\",\"olivere\"],\"summary\":\"候选人雷育林在Go语言、微服务架构、分布式系统、缓存、消息队列和数据库等核心后端技术栈方面展现出扎实的技能和丰富的项目经验。对DDD、TDD等软件工程实践有较好的理解和应用。硕士教育背景与岗位要求高度匹配。主要不足在于简历中项目经验的日期存在明显问题（显示为未来日期），且缺乏明确、可验证的工作经历详情，导致实际工作年限和项目贡献的真实性存疑。若项目经验真实且日期为笔误，则匹配度将显著提升。\"}","CreatedAt":"2025-12-20T00:22:44.472101+08:00"}
+evt: {789890345033797632 gemini primary /Users/leiyulin/easyHR/easyHR/internal/agent/leiyulin_cv_b2.pdf
+{"candidate_name":"雷育林","match_score":70,"skills":["Go","Gin","Redis","Kafka","gRPC","Protobuf","腾讯云SDK","火山引擎SDK","DDD
+(领域驱动设计)","TDD (测试驱动开发)","wrk (压测工具)","wire (依赖注入)","mock
+(测试)","自动化测试","Prometheus","OpenTelemetry","Grafana","cron","k8s","ElasticSearch","olivere","Viper","etcd","Zap","JWT","Lua","MySQL","HybridCache
+(BigCache+Redis)","Canal","乐观锁","TCC"],"summary":"候选人雷育林在Go语言、微服务架构、分布式系统、缓存、消息队列和数据库等核心后端技术栈方面展现出广泛且深入的技能。其硕士教育背景与岗位要求匹配。然而，简历中项目经验的日期均显示为未来，且缺乏明确、可验证的过往工作经历，这使得难以评估其是否满足“3年以上软件开发经验”的要求。虽然技能栈与岗位高度匹配，但实际工作经验的缺失或无法验证是主要风险点。"}
+2025-12-20 00:23:15.150954 +0800 CST m=+62.510342501}
+2025/12/20 00:23:15 [x] Sent
+{"SessionID":"789890345033797632","ModelType":"gemini","Role":"primary","Input":"/Users/leiyulin/easyHR/easyHR/internal/agent/leiyulin_cv_b2.pdf","Output":"{\"candidate_name\":\"雷育林\",\"match_score\":70,\"skills\":[\"Go\",\"Gin\",\"Redis\",\"Kafka\",\"gRPC\",\"Protobuf\",\"腾讯云SDK\",\"火山引擎SDK\",\"DDD
+(领域驱动设计)\",\"TDD (测试驱动开发)\",\"wrk (压测工具)\",\"wire (依赖注入)\",\"mock
+(测试)\",\"自动化测试\",\"Prometheus\",\"OpenTelemetry\",\"Grafana\",\"cron\",\"k8s\",\"ElasticSearch\",\"olivere\",\"Viper\",\"etcd\",\"Zap\",\"JWT\",\"Lua\",\"MySQL\",\"HybridCache
+(BigCache+Redis)\",\"Canal\",\"乐观锁\",\"TCC\"],\"summary\":\"候选人雷育林在Go语言、微服务架构、分布式系统、缓存、消息队列和数据库等核心后端技术栈方面展现出广泛且深入的技能。其硕士教育背景与岗位要求匹配。然而，简历中项目经验的日期均显示为未来，且缺乏明确、可验证的过往工作经历，这使得难以评估其是否满足“3年以上软件开发经验”的要求。虽然技能栈与岗位高度匹配，但实际工作经验的缺失或无法验证是主要风险点。\"}","CreatedAt":"2025-12-20T00:23:15.150954+08:00"}
+PASS
+ok easyHR/internal/agent 63.739s
+leiyulin@192 agent %

@@ -37,12 +37,18 @@ agents:
   promptDir: "easyHR/internal/agent/prompts"
   providers:
     - role: "primary"
-      model_type: "gpt4"
-      api_key: "test_key"
+      model_type: "gemini3"
+      api_key: "AIzaSyC7858OJh5rfJ5hy5x3YZfP0uM0bRGUz9c"
       base_url: "https://api.openai.com/v1"
       session_id: "primary_session"
     - role: "secondary"
-      model_type: "gpt4"
-      api_key: "test_key"
+      model_type: "gemini3"
+      api_key: "AIzaSyC7858OJh5rfJ5hy5x3YZfP0uM0bRGUz9c"
       base_url: "https://api.openai.com/v1"
       session_id: "secondary_session"
+
+rabbitmq:
+  host: "14.103.175.18"
+  port: 5672
+  username: "admin"
+  password: "admin123"

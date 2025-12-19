@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    restart: always
+    hostname: my-rabbitmq
+    ports:
+      - "5672:5672"   # AMQP 端口，应用程序连接用
+      - "15672:15672" # Web 管理界面端口
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=admin123
+    volumes:
+      # 数据持久化映射，防止重启后数据丢失
+      - ./mq_data:/var/lib/rabbitmq

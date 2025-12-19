@@ -18,6 +18,7 @@ import (
 	"sync"
 	"syscall"
 
+	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
@@ -42,13 +43,20 @@ type SMTPConfig struct {
 	FromName   string `yaml:"from_name"`
 }
 
+type RabbitMQConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+}
 type MainConfig struct {
-	EmailAttacher config.AppConfig `yaml:"email_attacher"`
-	CVHelper      CVHelperConfig   `yaml:"cv_helper"`
-	SMTPConfig    SMTPConfig       `yaml:"smtp_config"`
+	EmailAttacher  config.AppConfig `yaml:"email_attacher"`
+	CVHelper       CVHelperConfig   `yaml:"cv_helper"`
+	SMTPConfig     SMTPConfig       `yaml:"smtp_config"`
+	RabbitMQConfig RabbitMQConfig   `yaml:"rabbitmq"`
 }
 
-func InitLogger() logger.LoggerV1 {
+func initLogger() logger.LoggerV1 {
 	cfg := zap.NewDevelopmentConfig()
 	err := viper.UnmarshalKey("log", &cfg)
 	if err != nil {
@@ -73,8 +81,19 @@ func loadConfig() (*MainConfig, error) {
 	return &cfg, nil
 }
 
+func initRabbitMQ(cfg RabbitMQConfig) (*amqp.Channel, error) {
+	conn, err := amqp.Dial("amqp://" + cfg.Username + ":" + cfg.Password + "@" + cfg.Host + ":" + strconv.Itoa(cfg.Port))
+	if err != nil {
+		return nil, err
+	}
+	ch, err := conn.Channel()
+	if err != nil {
+		return nil, err
+	}
+	return ch, nil
+}
 func main() {
-	log := InitLogger()
+	log := initLogger()
 	// 加载配置
 	mainCfg, err := loadConfig()
 	if err != nil {

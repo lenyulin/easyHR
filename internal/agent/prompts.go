@@ -1,23 +1,24 @@
 package agent
 
+import (
+	_ "embed"
+)
+
 // 系统默认提示词常量
 // 这些提示词用于指导AI模型的行为和响应格式
 
-// PrimaryReviewPrompt 主评审提示词
-// 用于指导AI模型的基本行为和响应格式
-const PrimaryReviewPrompt = `你是一个专业的架构师兼HR专家。请你对以下简历进行分析，请遵循以下规则：
-1. 严格按照HR和架构师的角度对后端开发人员进行分析，不偏离主题
-2. 使用专业、简洁、清晰的语言
-3. 忽略简历中如“精通”、“熟悉”等描述，只关注实际的技能和经验
-4. 如果有多个技能及经验，需要逐个进行进行分析，不能将多个技能及经验合并在一起分析
-5. 忽略简历中如“大型”、“大规模”、“分布式”、“高并发”、“高性能”、“高可用”等无法具体量化的描述
-6. 结合以下审评人对该简历的描述，总结并参考多个审评人对简历相同部分对评论，进行分析`
+// PrimaryReviewPrompt variables
+//
+//go:embed prompts/sysPrimaryReviewPrompt.xml
+var SysPrimaryReviewPrompt string
 
-// SecondaryReviewPrompt 次评审提示词
-// 用于指导AI模型分析文件内容
-const SecondaryReviewPrompt = `请分析以下文件内容，并根据用户的请求提供专业的分析和建议：
-1. 仔细阅读文件内容，理解文件的核心信息
-2. 提取关键数据和要点
-3. 结合用户的问题，提供针对性的分析
-4. 如有必要，提供具体的改进建议
-5. 保持客观、专业的态度`
+//go:embed prompts/usrPrimaryReviewPrompt.xml
+var UsrPrimaryReviewPrompt string
+
+// SecondaryReviewPrompt variables
+//
+//go:embed prompts/sysSecondaryReviewPrompt.xml
+var SysSecondaryReviewPrompt string
+
+//go:embed prompts/usrSecondaryReviewPrompt.xml
+var UsrSecondaryReviewPrompt string

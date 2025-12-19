@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"github.com/google/generative-ai-go/genai"
@@ -19,23 +18,16 @@ type gemini struct {
 	modelName string
 }
 
-func (g *gemini) AnalyzeResume(ctx context.Context, role string, sysPrompt string, usrPrompt string, file string, opt ...interface{}) (*llm.ResumeAnalysis, error) {
-	f, err := os.Open(file)
-	if err != nil {
-		fmt.Printf("无法打开 records.pdf: %v", err)
-		return nil, err
-	}
-	defer f.Close()
-	uploadResult, err := g.client.UploadFile(ctx, "", f, nil)
-	if err != nil {
-		fmt.Printf("上传文件失败: %v", err)
-		return nil, err
-	}
-	fmt.Printf("文件上传成功: %s\n", uploadResult.URI)
+func (g *gemini) AnalyzeResume(ctx context.Context, role string, sysPrompt string, usrPrompt string, f string, opt ...interface{}) (*llm.ResumeAnalysis, error) {
 
+	file, err := g.client.UploadFileFromPath(ctx, f, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer g.client.DeleteFile(ctx, file.Name)
 	// 检查文件状态，确保处理完毕
 	for {
-		fileInfo, err := g.client.GetFile(ctx, uploadResult.Name)
+		fileInfo, err := g.client.GetFile(ctx, file.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -56,10 +48,14 @@ func (g *gemini) AnalyzeResume(ctx context.Context, role string, sysPrompt strin
 	// 设置生成参数 (可选)
 	model.SetTemperature(0.2) // 分析类任务建议较低的 temperature
 
+	// 3. 配置模型参数
+	model.ResponseMIMEType = "application/json"  // 强制 JSON
+	model.ResponseSchema = NewEvaluationSchema() // 绑定 Schema
+
 	// 调用 GenerateContent (混合 User Prompt 和 PDF)
 	resp, err := model.GenerateContent(ctx,
-		genai.FileData{URI: uploadResult.URI}, // 传入 PDF 的引用
-		genai.Text(usrPrompt),                 // 传入 User Prompt
+		genai.FileData{URI: file.URI}, // 传入 PDF 的引用
+		genai.Text(usrPrompt),         // 传入 User Prompt
 	)
 	if err != nil {
 		return nil, errors.New("GenerateContentFailed err:" + err.Error())
@@ -84,11 +80,6 @@ func (g *gemini) AnalyzeResume(ctx context.Context, role string, sysPrompt strin
 			}
 		}
 	}
-
-	// 清理文件
-	go func() {
-		g.client.DeleteFile(ctx, uploadResult.Name)
-	}()
 	return &analysis, nil
 }
 
@@ -100,7 +91,6 @@ func NewGeminiProvider(key string, modelName string) llm.LLMProvider {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer client.Close()
 	return &gemini{
 		client:    client,
 		modelName: modelName,

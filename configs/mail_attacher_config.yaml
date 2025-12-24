@@ -41,11 +41,13 @@ agents:
       api_key: "AIzaSyC7858OJh5rfJ5hy5x3YZfP0uM0bRGUz9c"
       base_url: "https://api.openai.com/v1"
       session_id: "primary_session"
+      model_name: "gemini-2.5-flash"
     - role: "secondary"
       model_type: "gemini3"
       api_key: "AIzaSyC7858OJh5rfJ5hy5x3YZfP0uM0bRGUz9c"
       base_url: "https://api.openai.com/v1"
       session_id: "secondary_session"
+      model_name: "gemini-2.5-flash"
 
 rabbitmq:
   host: "14.103.175.18"

@@ -20,6 +20,7 @@ type ResponseReceivedEvent struct {
 	Input     string
 	Output    string
 	CreatedAt time.Time
+	ModelName string
 }
 
 type RabbitMQProducer struct {

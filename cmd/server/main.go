@@ -2,14 +2,12 @@ package main
 
 import (
 	"context"
-	"easyHR/pkg/cv"
-	"easyHR/pkg/cv/pdf"
-	emailattacher "easyHR/pkg/email-attacher"
-	"easyHR/pkg/email-attacher/config"
-	emailattacherdomain "easyHR/pkg/email-attacher/domain"
-	emailreply "easyHR/pkg/email-reply"
-	"easyHR/pkg/logger"
-	"easyHR/pkg/storage"
+	config2 "easyHR/internal/agent/config"
+	"easyHR/internal/cv"
+	emailattacher "easyHR/internal/email/email-attacher"
+	"easyHR/internal/email/email-attacher/config"
+	emailattacherdomain "easyHR/internal/email/email-attacher/domain"
+	emailreply "easyHR/internal/email/email-reply"
 	"fmt"
 	"os"
 	"os/signal"
@@ -22,6 +20,11 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
+
+	"easyHR/event/aiagentmanager"
+	"easyHR/internal/agent"
+	"easyHR/pkg/logger"
+	"easyHR/pkg/storage"
 )
 
 type CVHelperConfig struct {
@@ -50,10 +53,11 @@ type RabbitMQConfig struct {
 	Password string `yaml:"password"`
 }
 type MainConfig struct {
-	EmailAttacher  config.AppConfig `yaml:"email_attacher"`
-	CVHelper       CVHelperConfig   `yaml:"cv_helper"`
-	SMTPConfig     SMTPConfig       `yaml:"smtp_config"`
-	RabbitMQConfig RabbitMQConfig   `yaml:"rabbitmq"`
+	EmailAttacher  config.AppConfig    `yaml:"email_attacher"`
+	CVHelper       CVHelperConfig      `yaml:"cv_helper"`
+	SMTPConfig     SMTPConfig          `yaml:"smtp_config"`
+	AgentConfig    config2.AgentConfig `yaml:"agent"`
+	RabbitMQConfig RabbitMQConfig      `yaml:"rabbitmq"`
 }
 
 func initLogger() logger.LoggerV1 {
@@ -141,8 +145,7 @@ func main() {
 	)
 
 	// 初始化 CV Service
-	pdfParser := pdf.NewParser()
-	cvService := cv.NewService(store, mainCfg.CVHelper.Collection, pdfParser, log)
+	cvService := cv.NewCVService(store, mainCfg.CVHelper.Collection, log)
 	cvChan := make(chan string, 100)
 
 	cvService.Run(cvChan, func() {
@@ -158,6 +161,18 @@ func main() {
 			}
 		}
 	})
+
+	// 初始化RabbitMQ及Producer
+	ch, err := initRabbitMQ(mainCfg.RabbitMQConfig)
+	if err != nil {
+		panic(err)
+	}
+	defer ch.Close()
+	producer := aiagentmanager.NewRabbitMQProducer(ch)
+
+	// 初始化 AiAgentManager
+	aiAgentManager := agent.NewAiAgentManager(mainCfg.AgentConfig, producer, log)
+	defer aiAgentManager.Stop()
 
 	// 注册回调
 	attacher.OnAttachmentDownloaded(func(email emailattacherdomain.Email, att emailattacherdomain.Attachment, savePath string) {

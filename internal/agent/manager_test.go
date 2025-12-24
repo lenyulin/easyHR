@@ -81,7 +81,7 @@ func TestAiAgentManager_Analysis(t *testing.T) {
 	producer := aiagentmanager.NewRabbitMQProducer(ch)
 
 	// Initialize Manager
-	manager := NewAiAgentManager(cfg, &producer, l)
+	manager := NewAiAgentManager(cfg, producer, l)
 
 	// Test Parameters
 	filePath := "/Users/leiyulin/easyHR/easyHR/internal/agent/leiyulin_cv_b2.pdf"
